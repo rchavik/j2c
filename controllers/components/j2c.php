@@ -11,6 +11,9 @@ class J2cComponent extends Object {
 		$this->Vocabulary = ClassRegistry::init('Vocabulary');
 		$this->Term = ClassRegistry::init('Term');
 		$this->Taxonomy = ClassRegistry::init('Taxonomy');
+
+		$this->JosContent = ClassRegistry::init('J2c.JosContent');
+		$this->Node = ClassRegistry::init('Node');
 	}
 
 	function startup(&$controller) {
@@ -132,4 +135,37 @@ class J2cComponent extends Object {
 		return true;
 	}
 
+	function _map_terms($josContent) {
+		return json_encode(array('1' => 'uncategorized'));
+	}
+
+	function migrate_content($josContent) {
+		$data = $this->Node->create(array(
+			'user_id' => 1,
+			'title' => $josContent['JosContent']['title'],
+			'slug' => $josContent['JosContent']['alias'],
+			'body' => join("\n", array($josContent['JosContent']['introtext'], $josContent['JosContent']['fulltext'])),
+			'status' => $josContent['JosContent']['state'],
+			'promote' =>$josContent['JosContent']['title'],
+			'type' => 'blog',$josContent['JosContent']['title'],
+			'created' => $josContent['JosContent']['created'],
+			'updated' => $josContent['JosContent']['modified'],
+			'path' => '/blog/' . $josContent['JosContent']['alias'],
+			'terms' => $this->_map_terms($josContent),
+			'Taxonomy' => array(
+				'Taxonomy' => array(1),
+				)
+			)
+		);
+		$this->Node->save($data);
+	}
+
+	function migrate_contents() {
+		$josContents = $this->JosContent->find('migrateable');
+
+		$migrated = 0;
+		foreach ($josContents as $josContent) {
+			$this->migrate_content($josContent);
+		}
+	}
 }

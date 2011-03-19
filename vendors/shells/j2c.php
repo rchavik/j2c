@@ -19,6 +19,7 @@ EOF;
 		$J2c = new J2cComponent;
 		$J2c->migrate_users();
 		$J2c->migrate_taxonomies();
+		$J2c->migrate_contents();
 	}
 
 	function main() {
