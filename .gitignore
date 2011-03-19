@@ -1,0 +1,5 @@
+*.diff
+*.log
+*.swp
+*.gz
+*.bz2
