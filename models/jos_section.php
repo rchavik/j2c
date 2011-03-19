@@ -17,7 +17,9 @@ class JosSection extends J2cAppModel {
 	function __findMigrateable($options = array()) {
 		$options = Set::merge(array(
 			'conditions' => array(
-				'JosSection.title <>' => 'About Joomla!',
+				'NOT' => array(
+					'JosSection.title' => array('About Joomla!', 'FAQs'),
+					),
 				),
 			), $options);
 		return $this->find('all', $options);

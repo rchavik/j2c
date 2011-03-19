@@ -5,6 +5,12 @@ class J2cComponent extends Object {
 	function __construct() {
 		$this->JosUser = ClassRegistry::init('J2c.JosUser');
 		$this->User = ClassRegistry::init('User');
+
+		$this->JosSection = ClassRegistry::init('J2c.JosSection');
+		$this->JosCategory = ClassRegistry::init('J2c.JosCategory');
+		$this->Vocabulary = ClassRegistry::init('Vocabulary');
+		$this->Term = ClassRegistry::init('Term');
+		$this->Taxonomy = ClassRegistry::init('Taxonomy');
 	}
 
 	function startup(&$controller) {
@@ -40,6 +46,89 @@ class J2cComponent extends Object {
 		}
 
 		$this->log(sprintf('Migrated: %d user(s)', $migrated));
+		return true;
+	}
+
+	function migrate_section_and_categories($sectionVocabulary, $josSection) {
+		if (!isset($josSection['JosCategory'])) return;
+
+		$section = $this->Term->create(array(
+			'title' => $josSection['JosSection']['title'],
+			'slug' => $josSection['JosSection']['alias'],
+			'description' => $josSection['JosSection']['description'],
+			)
+		);
+
+		if ($this->Term->save($section)) {
+			$section['Term']['id'] = $this->Term->id;
+		} else {
+			$section = $this->Term->findBySlug($josSection['JosSection']['alias']);
+		}
+
+		$data = $this->Taxonomy->create(array(
+			'term_id' => $section['Term']['id'],
+			'vocabulary_id' => $sectionVocabulary['Vocabulary']['id'],
+			)
+		);
+		$this->Taxonomy->save($section);
+
+		$categoryVocabulary = $this->Vocabulary->findByAlias('categories');
+		$migrated = 0;
+		foreach ($josSection['JosCategory'] as $josCategory) {
+			$term = $this->Term->create(array(
+				'title' => $josCategory['title'],
+				'slug' =>  $josCategory['alias'],
+				'description' => $josCategory['description'],
+				)
+			);
+			if ($this->Term->save($term)) {
+				$term['Term']['id'] = $this->Term->id;
+			} else {
+				$term = $this->Term->findBySlug($josCategory['alias']);
+			}
+
+			$taxonomy = $this->Taxonomy->create(array(
+				'term_id' => $term['Term']['id'],
+				'vocabulary_id' => $categoryVocabulary['Vocabulary']['id'], 
+				)
+			);
+			$this->Taxonomy->save($taxonomy);
+			$migrated++;
+		}
+		$this->log(sprintf('Migrated: %d categories in section: %s', $migrated, $section['Term']['title']));
+	}
+
+	// create a new vocabulary to contain joomla section
+	function _create_section() {
+		$data = $this->Vocabulary->create(array(
+			'title' => 'Sections',
+			'alias' => 'sections',
+			)
+		);
+
+		if ($vocabulary = $this->Vocabulary->findByAlias('sections')) {
+		} else {
+			$Type = ClassRegistry::init('Type');
+			$types = $Type->find('list');
+			$vocabulary = $this->Vocabulary->save($data);
+			$vocabulary['Vocabulary']['id'] = $this->Vocabulary->id;
+			$vocabulary['Type']['Type'] = array_keys($types);
+		}
+		$vocabulary = $this->Vocabulary->save($vocabulary);
+		return $vocabulary;
+	}
+
+	function migrate_taxonomies() {
+		$sectionVocabulary = $this->_create_section();
+
+		$josSections = $this->JosSection->find('migrateable');
+		$migrated = 0;
+		foreach ($josSections as $josSection) {
+			$this->migrate_section_and_categories($sectionVocabulary, $josSection);
+			$migrated++;
+		}
+
+		$this->log(sprintf('Migrated: %d sections', $migrated));
 		return true;
 	}
 

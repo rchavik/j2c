@@ -18,6 +18,7 @@ EOF;
 		App::import('Component', 'J2c.J2c');
 		$J2c = new J2cComponent;
 		$J2c->migrate_users();
+		$J2c->migrate_taxonomies();
 	}
 
 	function main() {
