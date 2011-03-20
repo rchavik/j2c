@@ -52,6 +52,7 @@ class J2cComponent extends Object {
 		return true;
 	}
 
+	/** @deprecated */
 	function migrate_section_and_categories($sectionVocabulary, $josSection) {
 		if (!isset($josSection['JosCategory'])) return;
 
@@ -102,6 +103,7 @@ class J2cComponent extends Object {
 	}
 
 	// create a new vocabulary to contain joomla section
+	// @deprecated
 	function _create_section() {
 		$data = $this->Vocabulary->create(array(
 			'title' => 'Sections',
@@ -121,13 +123,90 @@ class J2cComponent extends Object {
 		return $vocabulary;
 	}
 
-	function migrate_taxonomies() {
-		$sectionVocabulary = $this->_create_section();
 
+	function _create_category($vocab, $data) {
+
+		$new = array(
+			'title' => $data['title'],
+			'slug' => $data['slug'],
+			);
+		if (isset($data['Taxonomy']['parent_id'])) {
+			$new['Taxonomy'] = array(
+				'parent_id' => $data['Taxonomy']['parent_id'],
+				);
+		}
+
+		$category = $this->Term->findBySlug($data['slug']);
+		if (empty($category)) {
+			$category = $this->Term->create($new);
+			$termId = $this->Term->saveAndGetId($category['Term']);
+		} else {
+			$termId = $category['Term']['id'];
+		}
+
+		$termInVocabulary = $this->Term->Taxonomy->hasAny(array(
+			'Taxonomy.vocabulary_id' => $vocab['Vocabulary']['id'],
+			'Taxonomy.term_id' => $termId,
+			));
+
+		if (! $termInVocabulary) {
+			$this->Term->Taxonomy->Behaviors->attach('Tree', array(
+				'scope' => array(
+					'Taxonomy.vocabulary_id' => $vocab['Vocabulary']['id'],
+					),
+				));
+
+			$taxonomy = $this->Term->Taxonomy->find('first', array(
+				'conditions' => array(
+					'Taxonomy.term_id' => $termId,
+					'Taxonomy.vocabulary_id' => $vocab['Vocabulary']['id'],
+					)
+				)
+			);
+
+			if (! isset($taxonomy['Taxonomy']['id'])) {
+				$taxonomy = $this->Term->Taxonomy->create(array(
+					'parent_id' => $data['Taxonomy']['parent_id'],
+					'term_id' => $termId,
+					'vocabulary_id' => $vocab['Vocabulary']['id'],
+					)
+				);
+				$this->Term->Taxonomy->save($taxonomy);
+			}
+		}
+
+		return $termId;
+	}
+
+	function migrate_sections($josSection) {
+		$categoryVocab = $this->Term->Vocabulary->findByAlias('categories');
+
+		$termId = $this->_create_category($categoryVocab, array(
+			'title' => $josSection['JosSection']['title'],
+			'slug' => $josSection['JosSection']['alias'],
+			'Taxonomy' => array(
+				'parent_id' => null,
+				),
+			)
+		);
+
+		foreach ($josSection['JosCategory'] as $josCategory) {
+			$this->_create_category($categoryVocab, array(
+				'title' => $josCategory['title'],
+				'slug' => $josCategory['alias'],
+				'Taxonomy' => array(
+					'parent_id' => $termId,
+					),
+				)
+			);
+		}
+	}
+
+	function migrate_taxonomies() {
 		$josSections = $this->JosSection->find('migrateable');
 		$migrated = 0;
 		foreach ($josSections as $josSection) {
-			$this->migrate_section_and_categories($sectionVocabulary, $josSection);
+			$this->migrate_sections($josSection);
 			$migrated++;
 		}
 
