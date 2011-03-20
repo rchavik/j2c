@@ -215,7 +215,28 @@ class J2cComponent extends Object {
 	}
 
 	function _map_terms($josContent) {
-		return json_encode(array('1' => 'uncategorized'));
+
+		$sections = $this->Term->find('all', array(
+			'recursive' => -1,
+			'fields' => array('id', 'slug'),
+			'conditions' => array(
+				'slug' => $josContent['JosSection']['alias'],
+				)
+			)
+		);
+
+		$categories = $this->Term->find('all', array(
+			'recursive' => -1,
+			'fields' => array('id', 'slug'),
+			'conditions' => array(
+				'slug' => $josContent['JosCategory']['alias'],
+				)
+			)
+		);
+
+		$combined  = Set::combine($sections, '{n}.Term.id', '{n}.Term.slug');
+		$combined += Set::combine($categories, '{n}.Term.id', '{n}.Term.slug');
+		return json_encode($combined);
 	}
 
 	function migrate_content($josContent) {
