@@ -236,10 +236,11 @@ class J2cComponent extends Object {
 
 		$combined  = Set::combine($sections, '{n}.Term.id', '{n}.Term.slug');
 		$combined += Set::combine($categories, '{n}.Term.id', '{n}.Term.slug');
-		return json_encode($combined);
+		return $combined;
 	}
 
 	function migrate_content($josContent) {
+		$terms = $this->_map_terms($josContent);
 		$data = $this->Node->create(array(
 			'user_id' => 1,
 			'title' => $josContent['JosContent']['title'],
@@ -251,13 +252,13 @@ class J2cComponent extends Object {
 			'created' => $josContent['JosContent']['created'],
 			'updated' => $josContent['JosContent']['modified'],
 			'path' => '/blog/' . $josContent['JosContent']['alias'],
-			'terms' => $this->_map_terms($josContent),
-			'Taxonomy' => array(
-				'Taxonomy' => array(1),
-				)
+			'terms' => json_encode($terms),
 			)
 		);
-		$this->Node->save($data);
+		$data['Taxonomy'] = array(
+			'Taxonomy' => array_keys($terms),
+		);
+		$this->Node->saveWithMeta($data);
 	}
 
 	function migrate_contents() {
