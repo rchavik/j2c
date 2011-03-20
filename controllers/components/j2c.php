@@ -239,10 +239,18 @@ class J2cComponent extends Object {
 		return $combined;
 	}
 
+	function _map_creator($josContent) {
+		$this->JosUser->id = $josContent['JosContent']['created_by'];
+		$username = $this->JosUser->field('username');
+
+		$user = $this->User->findByUsername($username);
+		return $user['User']['id'];
+	}
+
 	function migrate_content($josContent) {
 		$terms = $this->_map_terms($josContent);
 		$data = $this->Node->create(array(
-			'user_id' => 1,
+			'user_id' => $this->_map_creator($josContent),
 			'title' => $josContent['JosContent']['title'],
 			'slug' => $josContent['JosContent']['alias'],
 			'body' => join("\n", array($josContent['JosContent']['introtext'], $josContent['JosContent']['fulltext'])),
