@@ -1,0 +1,23 @@
+j2c: Joomla to Croogo Migration Tool
+------------------------------------
+
+j2c is a overly simplistic croogo/cakephp plugin to help migrate 
+contents from Joomla to Croogo.
+
+This plugin is still being developed and currently being tested with 
+Joomla 1.5 and Croogo 'next' branch.
+
+Currently it supports migration of:
+	Users
+	Sections and Categories (mapped as Categories in Croogo)
+	Contents
+
+Usage:
+
+- clone or copy the j2c repository into your croogo's plugin directory
+- add a new database configuration entry in your croogo's config/database.php
+  named $joomla with the appropriate credentials.
+- execute
+
+	cake j2c migrate
+
