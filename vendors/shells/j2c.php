@@ -14,7 +14,20 @@ EOF;
 		$this->out($msg);
 	}
 
+	function _preflight_check() {
+		App::import('Model', 'ConnectionManager');
+		$errorMessage = "\nYou need to create an entry for your joomla " .
+			"database in croogo's configuration file.\n";
+		$connectionManager = ConnectionManager::getInstance();
+		if (!property_exists($connectionManager->config, 'joomla')) {
+			$this->out($errorMessage);
+			exit();
+		}
+	}
+
 	function migrate() {
+		$this->_preflight_check();
+
 		App::import('Component', 'J2c.J2c');
 		$J2c = new J2cComponent;
 		$J2c->migrate_users();
