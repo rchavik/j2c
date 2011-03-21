@@ -24,6 +24,17 @@ class J2cComponent extends Object {
 		CakeLog::write('j2c', $msg);
 	}
 
+	function _map_user_tz($params) {
+		$configs = explode("\n", $params);
+		foreach ($configs as $config) {
+			$c = parse_str($config);
+			if (isset($timezone)) {
+				return $timezone;
+			}
+		}
+		return '';
+	}
+
 	function migrate_user($josUser) {
 		$data = $this->User->create(array(
 			'id' => $josUser['JosUser']['id'],
@@ -33,6 +44,7 @@ class J2cComponent extends Object {
 			'email' => $josUser['JosUser']['email'],
 			'password' => $josUser['JosUser']['password'],
 			'created' => $josUser['JosUser']['registerDate'],
+			'timezone' => $this->_map_user_tz($josUser['JosUser']['params']),
 			)
 		);
 		return $this->User->save($data);
