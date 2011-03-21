@@ -278,6 +278,26 @@ class J2cComponent extends Object {
 		$data['Taxonomy'] = array(
 			'Taxonomy' => array_keys($terms),
 		);
+
+		if (!empty($josContent['JosContent']['metakey'])) {
+			$data['Meta'] = Set::merge(array(
+				String::uuid() => array(
+					'key' => 'meta_keywords',
+					'value' => $josContent['JosContent']['metakey'],
+					),
+				), @$data['Meta']
+			);
+		}
+
+		if (!empty($josContent['JosContent']['metakey'])) {
+			$data['Meta'] = Set::merge(array(
+				String::uuid() => array(
+					'key' => 'meta_description',
+					'value' => $josContent['JosContent']['metadesc'],
+					),
+				), @$data['Meta']
+			);
+		}
 		$this->Node->saveWithMeta($data);
 	}
 
