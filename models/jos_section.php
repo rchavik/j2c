@@ -3,8 +3,7 @@
 class JosSection extends J2cAppModel {
 
 	var $name = 'JosSection';
-	var $useDbConfig = 'joomla';
-	var $useTable = 'jos_sections';
+	var $useTable = false;
 
 	var $hasMany = array(
 		'JosCategory' => array(

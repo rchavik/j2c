@@ -3,16 +3,44 @@
 class J2cComponent extends Object {
 
 	function __construct() {
-		$this->JosUser = ClassRegistry::init('J2c.JosUser');
+		$options = array('ds' => 'joomla', 'type' => 'Model');
+
+		ClassRegistry::init(array('class' => 'J2c.J2cAppModel', 'type' => 'Model', 'table' => false));
+		$options = Set::merge(array(
+			'class' => 'J2c.JosUser',
+			'table' => 'jos_users',
+			), $options);
+
+		$this->JosUser = ClassRegistry::init($options);
+
 		$this->User = ClassRegistry::init('User');
 
-		$this->JosSection = ClassRegistry::init('J2c.JosSection');
-		$this->JosCategory = ClassRegistry::init('J2c.JosCategory');
+
+		$options = Set::merge($options, array(
+			'class' => 'J2c.JosCategory',
+			'table' => 'jos_categories',
+			)
+		);
+		$this->JosCategory = ClassRegistry::init($options);
+
+		$options = Set::merge($options, array(
+			'class' => 'J2c.JosSection',
+			'table' => 'jos_sections',
+			)
+		);
+		$this->JosSection = ClassRegistry::init($options);
+
 		$this->Vocabulary = ClassRegistry::init('Vocabulary');
 		$this->Term = ClassRegistry::init('Term');
 		$this->Taxonomy = ClassRegistry::init('Taxonomy');
 
-		$this->JosContent = ClassRegistry::init('J2c.JosContent');
+
+		$options = Set::merge($options, array(
+			'class' => 'J2c.JosContent',
+			'table' => 'jos_content',
+			)
+		);
+		$this->JosContent = ClassRegistry::init($options);
 		$this->Node = ClassRegistry::init('Node');
 	}
 

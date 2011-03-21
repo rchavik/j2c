@@ -3,8 +3,7 @@
 class JosContent extends J2cAppModel {
 
 	var $name = 'JosContent';
-	var $useDbConfig = 'joomla';
-	var $useTable = 'jos_content';
+	var $useTable = false;
 
 	var $belongsTo = array(
 		'JosSection' => array(
