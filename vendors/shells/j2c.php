@@ -20,6 +20,9 @@ EOF;
 		$J2c->migrate_users();
 		$J2c->migrate_taxonomies();
 		$J2c->migrate_contents();
+
+		clearCache();
+		clearCache(null, 'queries', null);
 	}
 
 	function main() {
