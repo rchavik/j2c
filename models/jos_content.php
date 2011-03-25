@@ -16,14 +16,22 @@ class JosContent extends J2cAppModel {
 			),
 		);
 
-	function __findMigrateable($options = array()) {
-		$options = Set::merge(array(
+	var $_findMethods = array(
+		'migrateable' => true,
+		);
+
+	function _findMigrateable($state, $query, $results = array()) {
+		$query = Set::merge(array(
 			'conditions' => array(
 				'NOT' => array(
 					'JosSection.title' => array('About Joomla!', 'FAQs'),
 					),
 				),
-			), $options);
-		return $this->find('all', $options);
+			), $query);
+		if ($state == 'before') {
+			return $query;
+		} elseif ($state == 'after') {
+			return $results;
+		}
 	}
 }
