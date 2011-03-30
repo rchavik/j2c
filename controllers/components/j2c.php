@@ -3,29 +3,40 @@
 class J2cComponent extends Object {
 
 	function __construct() {
+
+		$ConnectionManager = ConnectionManager::getInstance();
+		$dbConfigs = array_keys(get_object_vars($ConnectionManager->config));
+		if (! in_array('joomla', $dbConfigs)) {
+			return true;
+		}
+
 		$options = array('ds' => 'joomla', 'type' => 'Model');
 
-		ClassRegistry::init(array('class' => 'J2c.J2cAppModel', 'type' => 'Model', 'table' => false));
-		$options = Set::merge(array(
+		ClassRegistry::init(array(
+			'class' => 'J2c.J2cAppModel',
+			'type' => 'Model',
+			'table' => false,
+			));
+
+		$options = Set::merge($options, array(
+			'table' => 'users',
 			'class' => 'J2c.JosUser',
-			'table' => 'jos_users',
-			), $options);
+			));
 
 		$this->JosUser = ClassRegistry::init($options);
 
 		$this->User = ClassRegistry::init('User');
 
-
 		$options = Set::merge($options, array(
 			'class' => 'J2c.JosCategory',
-			'table' => 'jos_categories',
+			'table' => 'categories',
 			)
 		);
 		$this->JosCategory = ClassRegistry::init($options);
 
 		$options = Set::merge($options, array(
 			'class' => 'J2c.JosSection',
-			'table' => 'jos_sections',
+			'table' => 'sections',
 			)
 		);
 		$this->JosSection = ClassRegistry::init($options);
@@ -37,7 +48,7 @@ class J2cComponent extends Object {
 
 		$options = Set::merge($options, array(
 			'class' => 'J2c.JosContent',
-			'table' => 'jos_content',
+			'table' => 'content',
 			)
 		);
 		$this->JosContent = ClassRegistry::init($options);
