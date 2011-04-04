@@ -2,7 +2,8 @@
 
 class J2cComponent extends Object {
 
-	function __construct() {
+	function startup(&$controller) {
+		$this->controller =& $controller;
 
 		$ConnectionManager = ConnectionManager::getInstance();
 		$dbConfigs = array_keys(get_object_vars($ConnectionManager->config));
@@ -55,10 +56,6 @@ class J2cComponent extends Object {
 		$this->Node = ClassRegistry::init('Node');
 	}
 
-	function startup(&$controller) {
-		$this->controller =& $controller;
-	}
-
 	function log($msg) {
 		CakeLog::write('j2c', $msg);
 	}
@@ -100,7 +97,7 @@ class J2cComponent extends Object {
 		}
 
 		$this->log(sprintf('Migrated: %d user(s)', $migrated));
-		return true;
+		return $migrated;
 	}
 
 	/** @deprecated */
@@ -262,7 +259,7 @@ class J2cComponent extends Object {
 		}
 
 		$this->log(sprintf('Migrated: %d sections', $migrated));
-		return true;
+		return $migrated;
 	}
 
 	function _map_terms($josContent) {
@@ -346,6 +343,9 @@ class J2cComponent extends Object {
 		$migrated = 0;
 		foreach ($josContents as $josContent) {
 			$this->migrate_content($josContent);
+			$migrated++;
 		}
+
+		return $migrated;
 	}
 }
