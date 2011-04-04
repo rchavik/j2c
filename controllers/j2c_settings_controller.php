@@ -36,6 +36,14 @@ class J2cSettingsController extends J2cAppController {
 		$this->set('title_for_layout', __('Joomla Settings', true));
 	}
 
+	function admin_migrate() {
+		$migratedUsers = $this->J2c->migrate_users();
+		$migratedTaxonomies = $this->J2c->migrate_taxonomies();
+		$migratedContents = $this->J2c->migrate_contents();
+		$this->set(compact('migratedUsers', 'migratedTaxonomies', 'migratedContents'));
+		$this->Session->write('J2c.migrated', true);
+	}
+
 	function admin_test_connection() {
 		$this->set('title_for_layout', __('Test Connection', true));
 		$options = array(
@@ -51,8 +59,12 @@ class J2cSettingsController extends J2cAppController {
 		}
 		if ($count > 0) {
 			$this->Session->setFlash(sprintf(__('Connection seems okay. I can see %d contents from joomla database', true), $count));
+			$canMigrate = true;
 		} else {
 			$this->Session->setFlash(__('I cannot see any contents. Check log files from connection failure or other errors', true));
+			$canMigrate = false;
 		}
+		$migrated = $this->Session->read('J2c.migrated');
+		$this->set(compact('canMigrate', 'migrated'));
 	}
 }
