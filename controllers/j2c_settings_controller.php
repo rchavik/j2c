@@ -5,18 +5,20 @@ class J2cSettingsController extends J2cAppController {
 
 	function beforeFilter() {
 		$j2c = $this->Session->read('j2c');
-		$cm =& ConnectionManager::getInstance();
-		@$cm->create('joomla', array(
-			'driver' => 'mysql',
-			'persistent' => false,
-			'login' => $j2c['db']['login'],
-			'password' => $j2c['db']['password'],
-			'host' => $j2c['db']['host'],
-			'port' => $j2c['db']['port'],
-			'prefix' => $j2c['db']['prefix'],
-			'database' => $j2c['db']['database'],
-			)
-		);
+		if (!empty($j2c)) {
+			$cm =& ConnectionManager::getInstance();
+			@$cm->create('joomla', array(
+				'driver' => 'mysql',
+				'persistent' => false,
+				'login' => $j2c['db']['login'],
+				'password' => $j2c['db']['password'],
+				'host' => $j2c['db']['host'],
+				'port' => $j2c['db']['port'],
+				'prefix' => $j2c['db']['prefix'],
+				'database' => $j2c['db']['database'],
+				)
+			);
+		}
 		return parent::beforeFilter();
 	}
 
