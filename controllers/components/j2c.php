@@ -308,6 +308,7 @@ class J2cComponent extends Object {
 			'created' => $josContent['JosContent']['created'],
 			'updated' => $josContent['JosContent']['modified'],
 			'path' => '/blog/' . $josContent['JosContent']['alias'],
+			'visibility_roles' => '',
 			'terms' => json_encode($terms),
 			)
 		);
