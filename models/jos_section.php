@@ -18,13 +18,11 @@ class JosSection extends J2cAppModel {
 		);
 
 	function _findMigrateable($state, $query, $results = array()) {
-		$query = Set::merge(array(
+		$query = Set::merge($query, array(
 			'conditions' => array(
-				'NOT' => array(
-					'JosSection.title' => array('About Joomla!', 'FAQs'),
-					),
 				),
-			), $query);
+			)
+		);
 		if ($state == 'before') {
 			return $query;
 		} elseif ($state == 'after') {
