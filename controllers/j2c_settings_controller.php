@@ -4,18 +4,18 @@ class J2cSettingsController extends J2cAppController {
 	var $name = 'J2cSettings';
 
 	function beforeFilter() {
-		$j2c = $this->Session->read('j2c');
-		if (!empty($j2c)) {
+		$dbconfig = $this->Session->read('J2c.dbconfig');
+		if (!empty($dbconfig)) {
 			$cm =& ConnectionManager::getInstance();
 			@$cm->create('joomla', array(
 				'driver' => 'mysql',
 				'persistent' => false,
-				'login' => $j2c['db']['login'],
-				'password' => $j2c['db']['password'],
-				'host' => $j2c['db']['host'],
-				'port' => $j2c['db']['port'],
-				'prefix' => $j2c['db']['prefix'],
-				'database' => $j2c['db']['database'],
+				'login' => $dbconfig['db']['login'],
+				'password' => $dbconfig['db']['password'],
+				'host' => $dbconfig['db']['host'],
+				'port' => $dbconfig['db']['port'],
+				'prefix' => $dbconfig['db']['prefix'],
+				'database' => $dbconfig['db']['database'],
 				)
 			);
 		}
@@ -30,11 +30,13 @@ class J2cSettingsController extends J2cAppController {
 		if ($this->data) {
 			if ($this->J2cSetting->save($this->data)) {
 				$this->Session->setFlash(__('Configuration has been saved', true));
+			} else {
+				$this->Session->setFlash(__('Configuration cannot be saved. Check your credentials', true));
 			}
 		} else {
 			$this->data = $this->J2cSetting->read();
 		}
-		$this->Session->write('j2c', $this->data);
+		$this->Session->write('J2c.dbconfig', $this->data);
 		$this->set('title_for_layout', __('Joomla Settings', true));
 	}
 
@@ -54,10 +56,11 @@ class J2cSettingsController extends J2cAppController {
 			'table' => 'content',
 			'class' => 'J2c.JosContent',
 			);
-		try {
+		$cm =& ConnectionManager::getInstance();
+		if (property_exists($cm->config, 'joomla')) {
 			$count = ClassRegistry::init($options)->find('count');
-		}
-		catch (Exception $ex) {
+		} else {
+			$count = 0;
 		}
 		if ($count > 0) {
 			$this->Session->setFlash(sprintf(__('Connection seems okay. I can see %d contents from joomla database', true), $count));
