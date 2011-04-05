@@ -4,7 +4,7 @@ class J2cSettingsController extends J2cAppController {
 	var $name = 'J2cSettings';
 
 	function beforeFilter() {
-		$dbconfig = $this->Session->read('J2c.dbconfig');
+		$dbconfig = $this->Session->read($this->J2cSetting->key);
 		if (!empty($dbconfig)) {
 			$cm =& ConnectionManager::getInstance();
 			@$cm->create('joomla', array(
@@ -27,8 +27,9 @@ class J2cSettingsController extends J2cAppController {
 	}
 
 	function admin_edit() {
+		$this->J2cSetting->Session = $this->Session;
 		if ($this->data) {
-			if ($this->J2cSetting->save($this->data)) {
+			if ($result = $this->J2cSetting->save($this->data)) {
 				$this->Session->setFlash(__('Configuration has been saved', true));
 			} else {
 				$this->Session->setFlash(__('Configuration cannot be saved. Check your credentials', true));
@@ -36,7 +37,6 @@ class J2cSettingsController extends J2cAppController {
 		} else {
 			$this->data = $this->J2cSetting->read();
 		}
-		$this->Session->write('J2c.dbconfig', $this->data);
 		$this->set('title_for_layout', __('Joomla Settings', true));
 	}
 
