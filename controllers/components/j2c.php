@@ -347,6 +347,7 @@ class J2cComponent extends Object {
 			$migrated++;
 		}
 
+		$this->log(sprintf('Migrated: %d contents(s)', $migrated));
 		return $migrated;
 	}
 }
